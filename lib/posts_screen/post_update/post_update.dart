@@ -1,10 +1,8 @@
-import 'package:al1_2024_aristide_fumo_tp/posts_screen/post_detail_screen/post_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../main.dart';
 import '../../model/post.dart';
 import '../../shared/post_bloc/post_bloc.dart';
+import '../posts_screen.dart';
 
 class UpdatePostScreen extends StatelessWidget {
   final Post post;
@@ -17,21 +15,28 @@ class UpdatePostScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController titleController = TextEditingController(text: post.title);
-    final TextEditingController bodyController = TextEditingController(text: post.body);
+    final TextEditingController titleController = TextEditingController(
+        text: post.title);
+    final TextEditingController bodyController = TextEditingController(
+        text: post.body);
     final formKey = GlobalKey<FormState>();
-
 
 
     void submitPost() {
       final title = titleController.text.trim();
       final body = bodyController.text.trim();
       final updatedPost = post.copyWith(title: title, body: body);
+
+      // Add the update event to the Bloc
       BlocProvider.of<PostBloc>(context).add(
         UpdatePostEvent(post: updatedPost),
       );
-      MyApp.navigateTo(context);
-      //PostDetailScreen.navigateTo(context, updatedPost);
+
+      // Navigate to the PostsScreen and remove the current screen
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const PostsScreen()),
+            (Route<dynamic> route) => false, // Removes all previous routes
+      );
     }
 
     return Scaffold(
