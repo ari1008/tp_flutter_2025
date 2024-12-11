@@ -25,7 +25,7 @@ class FakeDataSource extends PostsDataSource {
           .where((post) => post.id != null)
           .reduce((a, b) => a.id! > b.id! ? a : b)
           .id;
-      final postCreate = post.copyWith(id: maxId != null ? maxId++ : 1);
+      final postCreate = post.copyWith(id: maxId != null ? maxId + 1 : 1);
       posts.add(postCreate);
     });
   }

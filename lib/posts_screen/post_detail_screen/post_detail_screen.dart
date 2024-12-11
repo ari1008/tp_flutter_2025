@@ -6,10 +6,19 @@ import '../post_update/post_update.dart';
 class PostDetailScreen extends StatelessWidget {
   final Post post;
 
-  // Méthode statique pour la navigation vers cet écran
   static Future<void> navigateTo(BuildContext context, Post post) {
     return Navigator.pushNamed(context, '/postDetail', arguments: post);
   }
+
+  static Future<void> navigateReplacementTo(BuildContext context, Post post) {
+    return Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PostDetailScreen(post: post),
+      ),
+    );
+  }
+
 
   const PostDetailScreen({
     super.key,
@@ -43,7 +52,7 @@ class PostDetailScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _onAddPost(context, post),
-        child: const Icon(Icons.abc),
+        child: const Icon(Icons.edit),
       ),
     );
   }

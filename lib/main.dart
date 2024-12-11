@@ -6,6 +6,7 @@ import 'package:al1_2024_aristide_fumo_tp/services/local_posts_data_source/fake_
 import 'package:al1_2024_aristide_fumo_tp/services/posts_data_source/fake_data_source.dart';
 import 'package:al1_2024_aristide_fumo_tp/services/posts_repository/posts_repository.dart';
 import 'package:al1_2024_aristide_fumo_tp/shared/post_bloc/post_bloc.dart';
+import 'package:al1_2024_aristide_fumo_tp/shared/posts_list_bloc/posts_list_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -18,52 +19,55 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  static Future<void> navigateTo(BuildContext context) {
-    return Navigator.pushNamed(context, '/');
-  }
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) => PostBloc(
-            postsRepository: PostsRepository(
-              postsDataSource: FakeDataSource(),
+    return RepositoryProvider(
+        create: (context) => PostsRepository(
               localPostsDataSource: FakeLocalPostsDataSource(),
+              postsDataSource: FakeDataSource(),
             ),
-          ),
-        ),
-      ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        routes: {
-          '/': (context) => const PostsScreen(),
-          '/postDetail': (context) => PostDetailScreen(
-            post: ModalRoute.of(context)!.settings.arguments as Post,
-          ),
-          '/postCreate': (context) => const CreatePostScreen(),
-          '/postUpdate': (context) => UpdatePostScreen(
-            post: ModalRoute.of(context)!.settings.arguments as Post,
-          ),
-        },
-        onGenerateRoute: (routeSettings) {
-          Widget screen = Container(color: Colors.pink);
-          final argument = routeSettings.arguments;
-          switch (routeSettings.name) {
-            case '/postDetail':
-              if (argument is Post) {
-                screen = PostDetailScreen(
-                  post: argument,
-                );
+        child: MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (context) => PostBloc(
+                postsRepository: context.read<PostsRepository>(),
+              ),
+            ),
+            BlocProvider(
+              create: (context) => PostsListBloc(
+                postsRepository: context.read<PostsRepository>(),
+              ),
+            ),
+          ],
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            routes: {
+              '/': (context) => const PostsScreen(),
+              '/postDetail': (context) => PostDetailScreen(
+                    post: ModalRoute.of(context)!.settings.arguments as Post,
+                  ),
+              '/postCreate': (context) => const CreatePostScreen(),
+              '/postUpdate': (context) => UpdatePostScreen(
+                    post: ModalRoute.of(context)!.settings.arguments as Post,
+                  ),
+            },
+            onGenerateRoute: (routeSettings) {
+              Widget screen = Container(color: Colors.pink);
+              final argument = routeSettings.arguments;
+              switch (routeSettings.name) {
+                case '/postDetail':
+                  if (argument is Post) {
+                    screen = PostDetailScreen(
+                      post: argument,
+                    );
+                  }
+                  break;
               }
-              break;
-          }
 
-          return MaterialPageRoute(builder: (context) => screen);
-        },
-      ),
-    );
+              return MaterialPageRoute(builder: (context) => screen);
+            },
+          ),
+        ));
   }
 }

@@ -5,10 +5,6 @@ sealed class PostEvent {
   const PostEvent();
 }
 
-class GetPostsEvent extends PostEvent {
-  const GetPostsEvent();
-}
-
 class AddPostEvent extends PostEvent {
   final Post post;
 

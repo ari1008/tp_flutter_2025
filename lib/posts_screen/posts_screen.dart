@@ -1,4 +1,5 @@
 import 'package:al1_2024_aristide_fumo_tp/posts_screen/post_create/post_create.dart';
+import 'package:al1_2024_aristide_fumo_tp/shared/posts_list_bloc/posts_list_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -9,10 +10,6 @@ import '../posts_screen/post_detail_screen/post_detail_screen.dart';
 
 class PostsScreen extends StatefulWidget {
   const PostsScreen({super.key});
-
-  static Future<void> navigateTo(BuildContext context) {
-    return Navigator.pushNamed(context, '/');
-  }
 
   @override
   State<PostsScreen> createState() => _PostsScreenState();
@@ -26,30 +23,46 @@ class _PostsScreenState extends State<PostsScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _getAllPosts();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocListener<PostBloc, PostState>(
-      listener: (context, state) {
-        if (state.status == PostStatus.error) {
-          _showSnackBar(context, state.exception);
-        }
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<PostBloc, PostState>(
+          listener: (context, state) {
+            if (state.status == PostStatus.error) {
+              _showSnackBar(context, state.exception);
+            } else if (state.status == PostStatus.success) {
+              _getAllPosts();
+            }
+          },
+        ),
+        BlocListener<PostsListBloc, PostsListState>(
+          listener: (context, state) {
+            if (state.status == PostsListStatus.error) {
+              _showSnackBar(context, state.exception);
+            }
+          },
+        ),
+      ],
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Posts'),
         ),
-        body: BlocBuilder<PostBloc, PostState>(
+        body: BlocBuilder<PostsListBloc, PostsListState>(
           builder: (context, state) {
             return switch (state.status) {
-              PostStatus.initial ||
-              PostStatus.loading =>
-                _buildLoading(context),
-              PostStatus.error =>
-                _buildError(context, state.exception as Exception),
-              PostStatus.success ||
-              PostStatus.addingPost ||
-              PostStatus.updatingPost ||
-              PostStatus.successGetPosts =>
-                _buildSuccess(context, state.posts),
+              PostsListStatus.initial ||
+              PostsListStatus.loading =>
+                  _buildLoading(context),
+              PostsListStatus.error =>
+                  _buildError(context, state.exception as Exception),
+              PostsListStatus.success =>
+                  _buildSuccess(context, state.posts),
             };
           },
         ),
@@ -62,8 +75,8 @@ class _PostsScreenState extends State<PostsScreen> {
   }
 
   void _getAllPosts() {
-    final postsBloc = BlocProvider.of<PostBloc>(context);
-    postsBloc.add(const GetPostsEvent());
+    final postsListBloc = BlocProvider.of<PostsListBloc>(context);
+    postsListBloc.add(const GetAllPostEvent());
   }
 
   Widget _buildLoading(BuildContext context) {
